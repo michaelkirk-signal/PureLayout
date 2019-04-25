@@ -495,7 +495,7 @@
  */
 - (NSLayoutConstraint *)autoPinEdgeToSuperviewMargin:(ALEdge)edge
 {
-    return [self autoPinEdgeToSuperviewMargin:edge relation:NSLayoutRelationEqual];
+    return [self autoPinEdgeToSuperviewMargin:edge withInset:0 relation:NSLayoutRelationEqual];
 }
 
 /**
@@ -507,15 +507,7 @@
  */
 - (NSLayoutConstraint *)autoPinEdgeToSuperviewMargin:(ALEdge)edge withInset:(CGFloat)inset
 {
-    self.translatesAutoresizingMaskIntoConstraints = NO;
-    ALView *superview = self.superview;
-    NSAssert(superview, @"View's superview must not be nil.\nView: %@", self);
-    if (edge == ALEdgeBottom || edge == ALEdgeRight || edge == ALEdgeTrailing) {
-        // The bottom, right, and trailing insets (and relations, if an inequality) are inverted to become offsets
-        inset = -inset;
-    }
-    ALMargin margin = [NSLayoutConstraint al_marginForEdge:edge];
-    return [self autoConstrainAttribute:(ALAttribute)edge toAttribute:(ALAttribute)margin ofView:superview withOffset:inset];
+    return [self autoPinEdgeToSuperviewMargin:edge withInset:inset relation:NSLayoutRelationEqual];
 }
 
 /**
@@ -527,19 +519,26 @@
  */
 - (NSLayoutConstraint *)autoPinEdgeToSuperviewMargin:(ALEdge)edge relation:(NSLayoutRelation)relation
 {
+    return [self autoPinEdgeToSuperviewMargin:edge withInset:0 relation:relation];
+}
+
+- (NSLayoutConstraint *)autoPinEdgeToSuperviewMargin:(ALEdge)edge withInset:(CGFloat)inset relation:(NSLayoutRelation)relation
+{
     self.translatesAutoresizingMaskIntoConstraints = NO;
     ALView *superview = self.superview;
     NSAssert(superview, @"View's superview must not be nil.\nView: %@", self);
     if (edge == ALEdgeBottom || edge == ALEdgeRight || edge == ALEdgeTrailing) {
-        // The bottom, right, and trailing relations are inverted
+        // The bottom, right, and trailing insets (and relations, if an inequality) are inverted to become offsets
+        inset = -inset;
         if (relation == NSLayoutRelationLessThanOrEqual) {
             relation = NSLayoutRelationGreaterThanOrEqual;
         } else if (relation == NSLayoutRelationGreaterThanOrEqual) {
             relation = NSLayoutRelationLessThanOrEqual;
         }
     }
+
     ALMargin margin = [NSLayoutConstraint al_marginForEdge:edge];
-    return [self autoConstrainAttribute:(ALAttribute)edge toAttribute:(ALAttribute)margin ofView:superview withOffset:0.0 relation:relation];
+    return [self autoConstrainAttribute:(ALAttribute)edge toAttribute:(ALAttribute)margin ofView:superview withOffset:inset];
 }
 
 /**
